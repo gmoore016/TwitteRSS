@@ -102,7 +102,7 @@ def construct_tweet(post):
     # Start with an empty string, then append pieces as necessary
     text = ""
     text += post_title
-    text += ' '
+    text += '\n'
     text += article_link
 
     # Return the composed tweet
