@@ -22,7 +22,8 @@ def main():
     new_posts = get_new_posts(**vars(args))
 
     for post in new_posts:
-        tweet(post)
+        tweet_text = construct_tweet(post)
+        send_tweet(tweet_text)
 
 
 def get_new_posts(source, frequency):
@@ -74,8 +75,31 @@ def get_threshold_time(frequency):
     threshold = now - datetime.timedelta(minutes=delta)
     return threshold
 
-def tweet(post):
-    print(post)
+
+def construct_tweet(post):
+    """Given a post object, this extracts the appropriate title and link to construct a tweet"""
+    # Extracts the post title
+    post_title = post.title.value
+
+    # In the event no link is found, use an empty string
+    article_link = ""
+
+    # Check each link to see if the link title matches the post title
+    for link in post.links:
+        if link.title == post_title:
+            article_link = link.href
+
+    # Start with an empty string, then append pieces as necessary
+    text = ""
+    text += post_title
+    text += ' '
+    text += article_link
+
+    # Return the composed tweet
+    return(text)
+
+def send_tweet(tweet):
+    print(tweet)
 
 
 main()
