@@ -2,7 +2,7 @@ import atoma
 import requests
 import argparse
 import datetime
-import pytz
+import tweepy
 
 TIMESTAMP_REGEX = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}"
 
@@ -21,9 +21,14 @@ def main():
 
     new_posts = get_new_posts(**vars(args))
 
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+
+    api = tweepy.API(auth)
+
     for post in new_posts:
         tweet_text = construct_tweet(post)
-        send_tweet(tweet_text)
+        api.update_status(tweet_text)
 
 
 def get_new_posts(source, frequency):
@@ -97,9 +102,5 @@ def construct_tweet(post):
 
     # Return the composed tweet
     return(text)
-
-def send_tweet(tweet):
-    print(tweet)
-
 
 main()
