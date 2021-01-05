@@ -2,6 +2,9 @@ import atoma
 import requests
 import argparse
 import datetime
+import pytz
+
+TIMESTAMP_REGEX = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}"
 
 def main():
     arg_parser = argparse.ArgumentParser(description="Description: {}".format(__file__))
@@ -35,12 +38,9 @@ def get_new_posts(source, frequency):
 
     # Interate through entries starting from newest
     for entry in feed.entries[0:4]:
-        # Convert string timestamp to Unix time
-        timestamp_string = entry.updated
-        published_time = calculate_unix_time(timestamp_string)
 
         # If the entry is new, add it to list to publish
-        if published_time > threshold:
+        if entry.updated.replace(tzinfo=None) > threshold:
             new_posts.append(entry)
 
         # Otherwise, we've reached the end of the new entries
@@ -52,13 +52,11 @@ def get_new_posts(source, frequency):
     return new_posts
 
 
-
-
 def get_threshold_time(frequency):
     """Function to calculate threshold time. Articles published
     after threshold time are "new" and should be processed. """
     # Pulls current time to determine "newness"
-    now = datetime.datetime.now()
+    now = datetime.datetime.now().replace(tzinfo=None)
 
     # Determines time frequency
     if frequency == 'm':
