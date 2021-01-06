@@ -8,6 +8,7 @@ import os
 # Maximum allowable length of a tweet
 LENGTH_LIMIT = 280
 
+
 def main():
     arg_parser = argparse.ArgumentParser(description="Description: {}".format(__file__))
 
@@ -117,11 +118,34 @@ def construct_tweet(post):
         acceptable_len = LENGTH_LIMIT - len(article_link) - len("... ")
         text = post_title[0:acceptable_len] + "...\n" + article_link
 
-    # If everything fits, just concatenate title and link
-    else:    
-        text = post_title + '\n' + article_link
+    # If both title and link fit, add as many tags as possible
+    else:
+        post_content = post_title
+
+        # Start with first tag
+        i = 0
+
+        # While we're still less than the length limit and tags remain, add more hashtags
+        while i < len(post.categories) and len(post_content) + len(' ') + len(hashtagify(post.categories[i]))+ len('\n') + len(article_link) <= LENGTH_LIMIT:
+            # Approved content
+            post_content = post_content + ' ' + hashtagify(post.categories[i])
+
+            # Move to the next hashtag on the next iteration
+            i += 1
+
+        # The text is the most recent acceptable version of the post
+        text = post_content + '\n' + article_link
 
     # Return the composed tweet
     return(text)
 
-main()
+
+def hashtagify(tag):
+    """Script that turns blog tags into hashtag-compliant strings"""
+    hashtag = tag.term
+    hashtag = hashtag.replace(' ', '')
+    hashtag = hashtag.replace('-', '')
+    hashtag = hashtag.lower()
+
+    return '#' + hashtag
+
