@@ -149,6 +149,3 @@ def hashtagify(tag):
 
     return '#' + hashtag
 
-
-for post in get_new_posts("http://marketdesigner.blogspot.com/feeds/posts/default", 'd'):
-    print(construct_tweet(post))
