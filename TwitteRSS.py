@@ -5,6 +5,9 @@ import datetime
 import tweepy
 import os
 
+# Maximum allowable length of a tweet
+LENGTH_LIMIT = 280
+
 def main():
     arg_parser = argparse.ArgumentParser(description="Description: {}".format(__file__))
 
@@ -99,11 +102,24 @@ def construct_tweet(post):
         if link.title == post_title:
             article_link = link.href
 
-    # Start with an empty string, then append pieces as necessary
-    text = ""
-    text += post_title
-    text += '\n'
-    text += article_link
+    # If the link is more than 280 characters on its own...
+    if len(article_link) > LENGTH_LIMIT:
+        # Attempt to tweet title and truncation note
+        suffix = "; too large for tweet"
+        text = post_title + suffix
+
+        # If that's too large, shorten the title and add truncation note
+        if len(text) > LENGTH_LIMIT:
+            text = post_title[0:LENGTH_LIMIT - 4] + "..." + suffix
+
+    # If the link fits but the title does not, truncate the title
+    elif len(post_title) + len(" ") + len(article_link) > LENGTH_LIMIT:
+        acceptable_len = LENGTH_LIMIT - len(article_link) - len("... ")
+        text = post_title[0:acceptable_len] + "...\n" + article_link
+
+    # If everything fits, just concatenate title and link
+    else:    
+        text = post_title + '\n' + article_link
 
     # Return the composed tweet
     return(text)
