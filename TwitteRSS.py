@@ -121,6 +121,10 @@ def construct_tweet(post):
     # If both title and link fit, add as many tags as possible
     else:
         post_content = post_title
+        
+        # Try and add the #EconTwitter hashtag
+        if len(post_content) + len(" #EconTwitter\n") + len(article_link) <= LENGTH_LIMIT:
+        post_content = post_content + ' #EconTwitter'
 
         # Start with first tag
         i = 0
