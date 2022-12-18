@@ -20,24 +20,42 @@ def main():
         '-f', "--frequency", action="store", default="d", choices=['m', 'h', 'd', 'w'], help="The timeframe to check for posts. Can be 'm', 'h', 'd', or 'w' for minute, hour, day, and week respectively."
     )
 
+    arg_parser.add_argument(
+        "-t", "--twitter", action="store_true", help="If set, the script will publish to a Twitter account."
+    )
+
+    arg_parser.add_argument(
+        "-m", "--mastodon", action="store_true", help="If set, the script will publish to a Mastodon account."
+    )
+
     args = arg_parser.parse_args()
 
     new_posts = get_new_posts(**vars(args))
-
-    consumer_key = os.environ['CONSUMER_KEY']
-    consumer_secret = os.environ['CONSUMER_SECRET']
-
-    access_token = os.environ['ACCESS_TOKEN']
-    access_secret = os.environ['ACCESS_SECRET']
-
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_secret)
-
-    api = tweepy.API(auth)
-
     for post in new_posts:
         tweet_text = construct_tweet(post)
-        api.update_status(tweet_text)
+
+        if args.twitter:
+            publish_to_twitter(tweet_text)
+        if args.mastodon:
+            publish_to_mastodon(tweet_text)
+
+
+def publish_to_twitter(tweet_text):
+    """Publishes a tweet to Twitter"""
+    # Pulls Twitter credentials from environment variables
+    twitter_consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+    twitter_consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+
+    twitter_access_token = os.environ['TWITTER_ACCESS_TOKEN']
+    twitter_access_secret = os.environ['TWITTER_ACCESS_SECRET']
+
+    # Authenticates with Twitter
+    auth = tweepy.OAuthHandler(twitter_consumer_key, twitter_consumer_secret)
+    auth.set_access_token(twitter_access_token, twitter_access_secret)
+
+    # Publishes tweet
+    api = tweepy.API(auth)
+    api.update_status(tweet_text)
 
 
 def get_new_posts(source, frequency):
