@@ -4,9 +4,26 @@ import argparse
 import datetime
 import tweepy
 import os
+from mastodon import Mastodon
 
 # Maximum allowable length of a tweet
 LENGTH_LIMIT = 280
+
+# Name of Mastodon secret
+MASTODON_CLIENT_SECRET = "mastodon_clientcred.secret"
+MASTODON_USER_SECRET = "mastodon_usercred.secret"
+
+
+def register_mastodon_app():
+    """
+    Creates a Mastodon app and saves the credentials to a file.
+    Only needs to run once
+    """
+    Mastodon.create_app( 
+        "TwitteRSS",
+        api_base_url = "https://econtwitter.net",
+        to_file = MASTODON_CLIENT_SECRET
+    )
 
 
 def main():
@@ -56,6 +73,27 @@ def publish_to_twitter(tweet_text):
     # Publishes tweet
     api = tweepy.API(auth)
     api.update_status(tweet_text)
+
+
+def publish_to_mastodon(tweet_text):
+    """Publishes a tweet to Mastodon"""
+    # Pulls Mastodon credentials from environment variables
+    mastodon_access_token = os.environ['MASTODON_ACCESS_TOKEN']
+    mastodon_api_base_url = os.environ['MASTODON_API_BASE_URL']
+
+    mastodon = Mastodon(client_id = MASTODON_CLIENT_SECRET)
+    mastodon.log_in(
+        os.environ['MASTODON_USERNAME'],
+        os.environ['MASTODON_PASSWORD'],
+        to_file = MASTODON_USER_SECRET
+    )
+
+    # Publishes to Mastodon
+    mastodon = Mastodon(
+        access_token=mastodon_access_token,
+        api_base_url=mastodon_api_base_url
+    )
+    mastodon.status_post(tweet_text)
 
 
 def get_new_posts(source, frequency):
@@ -142,7 +180,7 @@ def construct_tweet(post):
         
         # Try and add the #EconTwitter hashtag
         if len(post_content) + len(" #EconTwitter\n") + len(article_link) <= LENGTH_LIMIT:
-        post_content = post_content + ' #EconTwitter'
+            post_content = post_content + ' #EconTwitter'
 
         # Start with first tag
         i = 0
