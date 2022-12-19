@@ -10,8 +10,8 @@ from mastodon import Mastodon
 LENGTH_LIMIT = 280
 
 # Name of Mastodon secret
-MASTODON_CLIENT_SECRET = "mastodon_clientcred.secret"
-MASTODON_USER_SECRET = "mastodon_usercred.secret"
+MASTODON_CLIENT_SECRET = "/tmp/mastodon_clientcred.secret"
+MASTODON_USER_SECRET = "/tmp/mastodon_usercred.secret"
 
 
 def register_mastodon_app():
@@ -77,21 +77,10 @@ def publish_to_twitter(tweet_text):
 
 def publish_to_mastodon(tweet_text):
     """Publishes a tweet to Mastodon"""
-    # Pulls Mastodon credentials from environment variables
-    mastodon_access_token = os.environ['MASTODON_ACCESS_TOKEN']
-    mastodon_api_base_url = os.environ['MASTODON_API_BASE_URL']
-
-    mastodon = Mastodon(client_id = MASTODON_CLIENT_SECRET)
-    mastodon.log_in(
-        os.environ['MASTODON_USERNAME'],
-        os.environ['MASTODON_PASSWORD'],
-        to_file = MASTODON_USER_SECRET
-    )
-
-    # Publishes to Mastodon
+    # Gets the client secret
     mastodon = Mastodon(
-        access_token=mastodon_access_token,
-        api_base_url=mastodon_api_base_url
+        access_token= os.environ["MASTODON_TOKEN"],
+        api_base_url = os.environ["MASTODON_URL"]
     )
     mastodon.status_post(tweet_text)
 
