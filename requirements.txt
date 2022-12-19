@@ -1,0 +1,6 @@
+atoma
+requests
+argparse
+datetime
+tweepy
+Mastodon.py
